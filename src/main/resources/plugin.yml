@@ -1,0 +1,21 @@
+name: CoordinateCalculator
+version: 1.0.0
+main: net.mncraft.coordinateconverter.CoordinateConverter
+author: Bilguun Ochirbat
+commands:
+  coordinateconverter:
+    description: Convert real world coordinates to minecraft coordinates
+    usage: /<command>
+    aliases: [coordconvert, convertcoord, coord, ccoord, cconvert]
+permissions:
+  coordinateconverter.*:
+    description: Gives access to all commands
+    children:
+      coordinateconverter.basic: true
+      coordinateconverter.reload: true
+  coordinateconverter.basic:
+    description: Allows player to convert coordinates
+    default: true
+  coordinateconverter.reload:
+    description: Reloads plugin configuration
+    default: op
