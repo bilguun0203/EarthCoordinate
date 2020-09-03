@@ -1,21 +1,24 @@
-name: CoordinateCalculator
+name: EarthCoordinate
 version: 1.0.0
-main: net.mncraft.coordinateconverter.CoordinateConverter
+main: net.mncraft.earthcoordinate.EarthCoordinate
 author: Bilguun Ochirbat
 commands:
-  coordinateconverter:
+  earthcoordinate:
     description: Convert real world coordinates to minecraft coordinates
     usage: /<command>
-    aliases: [coordconvert, convertcoord, coord, ccoord, cconvert]
+    aliases: [ecoordinate, ecoord, earthcoordinate, earthcoordinate]
 permissions:
-  coordinateconverter.*:
+  earthcoordinate.*:
     description: Gives access to all commands
     children:
-      coordinateconverter.basic: true
-      coordinateconverter.reload: true
-  coordinateconverter.basic:
+      earthcoordinate.basic: true
+      earthcoordinate.reload: true
+  earthcoordinate.convert.*:
     description: Allows player to convert coordinates
     default: true
-  coordinateconverter.reload:
+    children:
+      earthcoordinate.convert.earth2mc: true
+      earthcoordinate.convert.mc2earth: true
+  earthcoordinate.reload:
     description: Reloads plugin configuration
     default: op

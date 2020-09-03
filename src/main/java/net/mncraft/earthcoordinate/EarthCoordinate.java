@@ -1,18 +1,24 @@
-package net.mncraft.coordinateconverter;
+package net.mncraft.earthcoordinate;
 
-import org.bukkit.Bukkit;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class CoordinateConverter extends JavaPlugin {
+public class EarthCoordinate extends JavaPlugin {
 
     FileConfiguration config = getConfig();
     int scale;
 
-    public CoordinateConverter() {
+    public EarthCoordinate() {
         this.scale = config.getInt("scale");
     }
 
@@ -40,22 +46,38 @@ public class CoordinateConverter extends JavaPlugin {
                     scale = config.getInt("scale");
                     getLogger().info("Scale: " + scale);
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aCC &e&l> &aConfiguration reloaded."));
-                    return true;
                 }
                 else {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', permissionDenied));
-                    return true;
                 }
+                return true;
+            }
+            else if (args[0].equalsIgnoreCase("whereami")) {
+                if (sender.hasPermission("coordinateconverter.basic") || sender.hasPermission("coordinateconverter.*")) {
+                    Location loc = ((Player) sender).getLocation();
+                    double[] coords = this.converterMC2RW(loc);
+                    String result = "§aCC §e§l>§3 Lat: §b" + coords[0] + " §3Long: §b" + coords[1];
+                    String mapUrl = "http://maps.google.com/maps?q=" + coords[0] + "," + coords[1] + "&ll=" + coords[0] + "," + coords[1] + "&z=5";
+
+                    TextComponent msg = new TextComponent(result);
+                    msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§aGoogle Map дээр нээх")));
+                    msg.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, mapUrl));
+                    sender.spigot().sendMessage(msg);
+                }
+                else {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', permissionDenied));
+                }
+                return true;
             }
         }
         if (sender.hasPermission("coordinateconverter.basic") || sender.hasPermission("coordinateconverter.*")) {
             if (args.length == 2) {
                 boolean validator = true;
-                float latitude = 0;
-                float longitude = 0;
+                double latitude = 0;
+                double longitude = 0;
                 try {
-                    latitude = Float.parseFloat(args[0]);
-                    longitude = Float.parseFloat(args[1]);
+                    latitude = Double.parseDouble(args[0]);
+                    longitude = Double.parseDouble(args[1]);
                 } catch (Exception e) {
                     validator = false;
                 }
@@ -63,7 +85,7 @@ public class CoordinateConverter extends JavaPlugin {
                     validator = false;
                 }
                 if (validator) {
-                    int[] coords = this.converter(latitude, longitude);
+                    int[] coords = this.converterRW2MC(latitude, longitude);
                     String result = "&aCC &e&l>&3 X: &b" + coords[0] + " &3Z: &b" + coords[1];
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', result));
                 } else {
@@ -86,9 +108,15 @@ public class CoordinateConverter extends JavaPlugin {
         return true;
     }
 
-    private int[] converter(float latitude, float longitude) {
-        int x = Math.round(longitude * 120000 / this.scale);
-        int z = -1 * Math.round(latitude * 120000 / this.scale);
+    private int[] converterRW2MC(double latitude, double longitude) {
+        int x = (int) Math.round(longitude * 120000 / this.scale);
+        int z = -1 * (int) Math.round(latitude * 120000 / this.scale);
         return new int[]{x, z};
+    }
+
+    private double[] converterMC2RW(Location loc) {
+        double longitude = loc.getX() * this.scale / 120000;
+        double latitude = -1 * loc.getZ() * this.scale / 120000;
+        return new double[]{latitude, longitude};
     }
 }
