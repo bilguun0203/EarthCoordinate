@@ -29,6 +29,20 @@ public class EarthCoordinate extends JavaPlugin {
     @Override
     public void onEnable() {
         config.addDefault("scale", 2000);
+        config.addDefault("map_url", "http://maps.google.com/maps?q=%latitude%,%longitude%&ll=%latitude%,%longitude%&z=5");
+        config.addDefault("lang.prefix", "&aEC &e&l> ");
+        config.addDefault("lang.no_permission", "&cYou don't have permission");
+        config.addDefault("lang.config_reloaded", "&aConfiguration reloaded");
+        config.addDefault("lang.convert_tomc", "&3X: &b%x% &3Z: &b%z%");
+        config.addDefault("lang.convert_tomc_invalid", "&cInvalid coordinates");
+        config.addDefault("lang.convert_toearth", "&3Latitude: &b%latitude% &3Longitude: &b%longitude%");
+        config.addDefault("lang.open_map", "Open in Google Maps");
+        config.addDefault("lang.latitude", "latitude");
+        config.addDefault("lang.longitude", "longitude");
+        config.addDefault("lang.help.header", "&8&m-----[ &aCoordinate Converter &8&m]-----");
+        config.addDefault("lang.help.tomc", "&d/ecoord &btomc &3<latitude> <longitude> &e- &aConverts Earth coordinates to Minecraft coordinates");
+        config.addDefault("lang.help.toearth", "&d/ecoord &btoearth &3[x] [z] &e- &aConverts Minecraft coordinates to Earth coordinates");
+        config.addDefault("lang.help.reload", "&d/ecoord &breload &e- &aReloads the plugin configuration");
         config.options().copyDefaults(true);
         saveConfig();
         getLogger().info("Scale: " + scale);
@@ -58,7 +72,7 @@ public class EarthCoordinate extends JavaPlugin {
         } else if (args.length == 2) {
             if (args[0].equals("tomc")) {
                 if (sender.hasPermission("earthcoordinate.convert.tomc"))
-                    commands.add("<latitude>");
+                    commands.add("<" + this.config.getString("lang.latitude") + ">");
             }
             if (args[0].equals("toearth")) {
                 if (sender.hasPermission("earthcoordinate.convert.toearth.coords"))
@@ -68,7 +82,7 @@ public class EarthCoordinate extends JavaPlugin {
         } else if (args.length == 3) {
             if (args[0].equals("tomc")) {
                 if (sender.hasPermission("earthcoordinate.convert.tomc"))
-                    commands.add("<longitude>");
+                    commands.add("<" + this.config.getString("lang.longitude") + ">");
             }
             if (args[0].equals("toearth")) {
                 if (sender.hasPermission("earthcoordinate.convert.toearth.coords"))
@@ -139,16 +153,14 @@ public class EarthCoordinate extends JavaPlugin {
         config = getConfig();
         scale = config.getInt("scale");
         getLogger().info("Scale: " + scale);
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aEC &e&l> &aConfiguration reloaded."));
+        sender.sendMessage(this.getMessage("lang.help.header"));
     }
 
     private void commandECHelp(CommandSender sender) {
-        String header = "&8&m-----[ &aCoordinate Converter &8&m]-----";
-        String help = "&d/ecoord &btomc &3<latitude> <longitude> &e- &aConverts Earth coordinates to Minecraft coordinates\n" +
-                "&d/ecoord &btoearth &3[x] [z] &e- &aConverts Minecraft coordinates to Earth coordinates\n" +
-                "&d/ecoord &breload &e- &aReloads the plugin configuration";
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header));
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', help));
+        sender.sendMessage(this.getMessageWithoutPrefix("lang.help.header"));
+        sender.sendMessage(this.getMessageWithoutPrefix("lang.help.tomc"));
+        sender.sendMessage(this.getMessageWithoutPrefix("lang.help.toearth"));
+        sender.sendMessage(this.getMessageWithoutPrefix("lang.help.reload"));
     }
 
     private void commandEarth2MC(CommandSender sender, String[] args) {
@@ -160,16 +172,16 @@ public class EarthCoordinate extends JavaPlugin {
             if (this.validateEarthCoordinates(latitude, longitude)) {
                 this.commandEarth2MC(sender, latitude, longitude);
             } else {
-                String result = "&aEC &e&l>&c Invalid coordinates";
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', result));
+                sender.sendMessage(this.getMessage("lang.convert_tomc_invalid"));
             }
         } catch (Exception ignored) {}
     }
 
     private void commandEarth2MC(CommandSender sender, double latitude, double longitude) {
         double[] coords = this.converterEarth2MC(latitude, longitude);
-        String result = "&aEC &e&l>&3 X: &b" + String.format("%.2f", coords[0]) + " &3Z: &b" + String.format("%.2f", coords[1]);
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', result));
+        sender.sendMessage(this.getMessage("lang.convert_tomc")
+                .replace("%x%", String.format("%.2f", coords[0]))
+                .replace("%z%", String.format("%.2f", coords[1])));
     }
 
     private void commandMC2Earth(CommandSender sender) {
@@ -192,17 +204,20 @@ public class EarthCoordinate extends JavaPlugin {
 
     private void commandMC2Earth(CommandSender sender, double x, double z) {
         double[] coords = this.converterMC2Earth(x, z);
-        String result = "§aEC §e§l>§3 Lat: §b" + String.format("%.4f", coords[0]) + " §3Long: §b" + String.format("%.4f", coords[1]);
-        String mapUrl = "http://maps.google.com/maps?q=" + coords[0] + "," + coords[1] + "&ll=" + coords[0] + "," + coords[1] + "&z=5";
+        String mapUrl = ("" + this.config.getString("map_url"))
+                .replace("%latitude%", String.format("%.6f", coords[0]))
+                .replace("%longitude%", String.format("%.6f", coords[1]));
 
-        TextComponent msg = new TextComponent(result);
-        msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("§aGoogle Map дээр нээх")));
+        TextComponent msg = new TextComponent(this.getMessage("lang.convert_toearth")
+                .replace("%latitude%", String.format("%.4f", coords[0]))
+                .replace("%longitude%", String.format("%.4f", coords[1])));
+        msg.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(this.getMessageWithoutPrefix("lang.open_map"))));
         msg.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, mapUrl));
         sender.spigot().sendMessage(msg);
     }
 
     private void sendNoPermission(CommandSender sender) {
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&aEC &e&l> &cPermission denied"));
+        sender.sendMessage(this.getMessage("lang.no_permission"));
     }
 
     private double[] converterEarth2MC(double latitude, double longitude) {
@@ -219,5 +234,13 @@ public class EarthCoordinate extends JavaPlugin {
 
     private boolean validateEarthCoordinates(double latitude, double longitude) {
         return ((latitude <= 90 && latitude >= -90) && (longitude >= -180 && longitude <= 180));
+    }
+
+    public String getMessageWithoutPrefix(String path) {
+        return ChatColor.translateAlternateColorCodes('&', "" + config.getString(path));
+    }
+
+    public String getMessage(String path) {
+        return ChatColor.translateAlternateColorCodes('&', config.getString("lang.prefix") + config.getString(path));
     }
 }

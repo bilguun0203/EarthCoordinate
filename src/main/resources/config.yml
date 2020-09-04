@@ -1,2 +1,21 @@
 # scale - Scale of the map (e.g 1000, 2000...)
 scale: 2000
+# Placeholders: %latitude%, %longitude%
+map_url: "http://maps.google.com/maps?q=%latitude%,%longitude%&ll=%latitude%,%longitude%&z=5"
+lang:
+  prefix: "&aEC &e&l> "
+  no_permission: "&cYou don''t have permission"
+  config_reloaded: "&aConfiguration reloaded"
+  # Placeholders: %x%, %z%
+  convert_tomc: "&3X: &b%x% &3Z: &b%z%"
+  convert_tomc_invalid: "&cInvalid coordinates"
+  # Placeholders: %latitude%, %longitude%
+  convert_toearth: "&3Latitude: &b%latitude% &3Longitude: &b%longitude%"
+  open_map: "Open in Google Maps"
+  latitude: "latitude"
+  longitude: "longitude"
+  help:
+    header: "&8&m-----[ &aCoordinate Converter &8&m]-----"
+    tomc: "&d/ecoord &btomc &3<latitude> <longitude> &e- &aConverts Earth coordinates to Minecraft coordinates"
+    toearth: "&d/ecoord &btoearth &3[x] [z] &e- &aConverts Minecraft coordinates to Earth coordinates"
+    reload: "&d/ecoord &breload &e- &aReloads the plugin configuration"
