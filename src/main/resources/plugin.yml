@@ -1,24 +1,50 @@
 name: EarthCoordinate
 version: 1.0.0
 main: net.mncraft.earthcoordinate.EarthCoordinate
-author: Bilguun Ochirbat
+author: Bilguun
 commands:
   earthcoordinate:
     description: Convert real world coordinates to minecraft coordinates
-    usage: /<command>
-    aliases: [ecoordinate, ecoord, earthcoordinate, earthcoordinate]
+    usage: /<command> [toearth|tomc|help|reload] [x|latitude] [z|longitude]
+    aliases: [coord, ecoord, ecoordinate, earthcoordinate, earthcoord]
+    permission: earthcoordinate.help
 permissions:
   earthcoordinate.*:
     description: Gives access to all commands
+    default: op
     children:
-      earthcoordinate.basic: true
+      earthcoordinate.all: true
+  earthcoordinate.all:
+    description: Gives access to all commands
+    default: op
+    children:
+      earthcoordinate.convert: true
+      earthcoordinate.help: true
       earthcoordinate.reload: true
-  earthcoordinate.convert.*:
+  earthcoordinate.convert:
     description: Allows player to convert coordinates
-    default: true
+    default: op
     children:
-      earthcoordinate.convert.earth2mc: true
-      earthcoordinate.convert.mc2earth: true
+      earthcoordinate.convert.tomc: true
+      earthcoordinate.convert.toearth: true
+  earthcoordinate.convert.toearth:
+    description: Allows player to convert Minecraft coordinates to Earth coordinates
+    default: op
+    children:
+      earthcoordinate.convert.toearth.self: true
+      earthcoordinate.convert.toearth.coords: true
+  earthcoordinate.convert.toearth.self:
+    description: Allows player to convert Minecraft coordinates to Earth coordinates
+    default: true
+  earthcoordinate.convert.toearth.coords:
+    description: Allows player to convert any Minecraft coordinates to Earth coordinates
+    default: op
+  earthcoordinate.convert.tomc:
+    description: Allows player to convert Earth coordinate to Minecraft coordinates
+    default: true
+  earthcoordinate.help:
+    description: EarthCoordinate plugin help
+    default: true
   earthcoordinate.reload:
     description: Reloads plugin configuration
     default: op
