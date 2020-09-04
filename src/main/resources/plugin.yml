@@ -5,8 +5,8 @@ author: Bilguun
 commands:
   earthcoordinate:
     description: Convert real world coordinates to minecraft coordinates
-    usage: /<command> [toearth|tomc|help|reload] [x|latitude] [z|longitude]
-    aliases: [coord, ecoord, ecoordinate, earthcoordinate, earthcoord]
+    usage: /<command> [tomc|toearth|help|reload] [x|latitude] [z|longitude]
+    aliases: [coord, ecoord, ecoordinate, earthcoordinate, earthcoord, ec]
     permission: earthcoordinate.help
 permissions:
   earthcoordinate.*:

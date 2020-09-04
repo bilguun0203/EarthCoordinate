@@ -11,6 +11,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.StringUtil;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class EarthCoordinate extends JavaPlugin {
 
@@ -27,11 +32,52 @@ public class EarthCoordinate extends JavaPlugin {
         config.options().copyDefaults(true);
         saveConfig();
         getLogger().info("Scale: " + scale);
+        getCommand("earthcoordinate").setTabCompleter(this);
     }
 
     @Override
     public void onDisable() {
         //
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+        List<String> commands = new ArrayList<>();
+
+        if (args.length == 1) {
+            if (sender.hasPermission( "earthcoordinate.reload"))
+                commands.add("reload");
+            if (sender.hasPermission( "earthcoordinate.help"))
+                commands.add("help");
+            if (sender.hasPermission( "earthcoordinate.convert.tomc"))
+                commands.add("tomc");
+            if (sender.hasPermission( "earthcoordinate.convert.toearth.self") || sender.hasPermission( "earthcoordinate.convert.toearth.coords"))
+                commands.add("toearth");
+            StringUtil.copyPartialMatches(args[0], commands, completions);
+        } else if (args.length == 2) {
+            if (args[0].equals("tomc")) {
+                if (sender.hasPermission("earthcoordinate.convert.tomc"))
+                    commands.add("<latitude>");
+            }
+            if (args[0].equals("toearth")) {
+                if (sender.hasPermission("earthcoordinate.convert.toearth.coords"))
+                    commands.add("<x>");
+            }
+            StringUtil.copyPartialMatches(args[1], commands, completions);
+        } else if (args.length == 3) {
+            if (args[0].equals("tomc")) {
+                if (sender.hasPermission("earthcoordinate.convert.tomc"))
+                    commands.add("<longitude>");
+            }
+            if (args[0].equals("toearth")) {
+                if (sender.hasPermission("earthcoordinate.convert.toearth.coords"))
+                    commands.add("<z>");
+            }
+            StringUtil.copyPartialMatches(args[2], commands, completions);
+        }
+        Collections.sort(completions);
+        return completions;
     }
 
     @Override
@@ -48,7 +94,7 @@ public class EarthCoordinate extends JavaPlugin {
                     return true;
                 case "toearth":
                     if (args.length == 1) {
-                        if(sender.hasPermission("earthcoordinate.convert.mc2earth.self")) {
+                        if(sender.hasPermission("earthcoordinate.convert.toearth.self")) {
                             this.commandMC2Earth(sender);
                         }
                         else {
@@ -57,7 +103,7 @@ public class EarthCoordinate extends JavaPlugin {
                         return true;
                     }
                     else if (args.length == 3) {
-                        if(sender.hasPermission("earthcoordinate.convert.mc2earth.coords")) {
+                        if(sender.hasPermission("earthcoordinate.convert.toearth.coords")) {
                             this.commandMC2Earth(sender, args);
                         }
                         else {
@@ -68,7 +114,7 @@ public class EarthCoordinate extends JavaPlugin {
                     break;
                 case "tomc":
                     if(args.length == 3) {
-                        if (sender.hasPermission("earthcoordinate.convert.earth2mc")) {
+                        if (sender.hasPermission("earthcoordinate.convert.tomc")) {
                             this.commandEarth2MC(sender, args);
                         }
                         else {
@@ -143,12 +189,12 @@ public class EarthCoordinate extends JavaPlugin {
     }
 
     private void commandMC2Earth(CommandSender sender, Location loc) {
-        this.commandMC2Earth(sender, loc.getX(), loc.getY());
+        this.commandMC2Earth(sender, loc.getX(), loc.getZ());
     }
 
     private void commandMC2Earth(CommandSender sender, double x, double z) {
         double[] coords = this.converterMC2Earth(x, z);
-        String result = "§aEC §e§l>§3 Lat: §b" + coords[0] + " §3Long: §b" + coords[1];
+        String result = "§aEC §e§l>§3 Lat: §b" + String.format("%.4f", coords[0]) + " §3Long: §b" + String.format("%.4f", coords[1]);
         String mapUrl = "http://maps.google.com/maps?q=" + coords[0] + "," + coords[1] + "&ll=" + coords[0] + "," + coords[1] + "&z=5";
 
         TextComponent msg = new TextComponent(result);
