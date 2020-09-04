@@ -144,13 +144,11 @@ public class EarthCoordinate extends JavaPlugin {
 
     private void commandECHelp(CommandSender sender) {
         String header = "&8&m-----[ &aCoordinate Converter &8&m]-----";
-        String usage = "&dUsage: &b/mc2earth &3<lat> <long>";
-        String example = "&dExample: &b/mc2earth &347.9184676 106.9177016";
-        String aliases = "&dAliases: &bmc2earth";
+        String help = "&d/ecoord &btomc &3<latitude> <longitude> &e- &aConverts Earth coordinates to Minecraft coordinates\n" +
+                "&d/ecoord &btoearth &3[x] [z] &e- &aConverts Minecraft coordinates to Earth coordinates\n" +
+                "&d/ecoord &breload &e- &aReloads the plugin configuration";
         sender.sendMessage(ChatColor.translateAlternateColorCodes('&', header));
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', usage));
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', example));
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', aliases));
+        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', help));
     }
 
     private void commandEarth2MC(CommandSender sender, String[] args) {
